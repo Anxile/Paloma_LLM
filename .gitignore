@@ -1,0 +1,32 @@
+# 忽略Python字节码文件
+*.py[cod]
+
+# 忽略Django生成的临时文件
+*.log
+*.pot
+*.pyc
+*/__pycache__
+local_settings.py
+
+# 忽略数据库文件
+*.sqlite3
+
+# 忽略IDE和编辑器生成的文件
+.vscode/
+*.sublime*
+*.idea/
+*.egg-info/
+*.egg
+*.pyc
+*.swo
+*.swp
+*.komodoproject
+.project
+.pydevproject
+
+# 忽略媒体文件
+media/
+
+*.env
+venv/
+node_modules/
