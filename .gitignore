@@ -28,5 +28,5 @@ local_settings.py
 media/
 
 *.env
-venv/
+.venv/
 node_modules/
