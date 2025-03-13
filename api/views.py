@@ -3,8 +3,9 @@ from django.http import JsonResponse
 from openai import OpenAI
 from django.conf import settings
 import json
-client = OpenAI(api_key = settings.OPENAI_API_KEY)
+import re
 
+client = OpenAI(api_key = settings.OPENAI_API_KEY)
 
 # Create your views here.
 def home(request):
@@ -24,6 +25,11 @@ def submit_form(request):
     if request.method == 'POST':
         try:
             form_data = json.loads(request.body)
+            
+            about_text = form_data.get('about', '')
+            sanitized_about = re.sub(r'[^a-zA-Z0-9\s.,!?-]', '', about_text)
+            form_data['about'] = sanitized_about
+            print(sanitized_about)
         
             available_days = [day for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] if form_data.get(day)]
             cuisines = [cuisine for cuisine in ['Japanese Cuisine', 'Indian Cuisine', 'Canadian Cuisine', 'Italian Cuisine', 'Chinese Cuisine', 'Mexican Cuisine', 'American Cuisine'] if form_data.get(cuisine)]
@@ -76,7 +82,7 @@ def submit_form(request):
                 f"   - Education: {form_data.get('education')}\n\n"
             
                 f"3. **Personal Interests and Lifestyle**:\n"
-                f"   - About Me: {form_data.get('about')}\n"
+                f"   - About Me: {sanitized_about}\n"
                 f"   - Available Days: {', '.join(available_days)}\n"
                 f"   - Spare Hours in a Day: {form_data.get('active_hours_in_a_day')}\n"
                 f"   - Favorite Cuisines: {', '.join(cuisines)}\n"
