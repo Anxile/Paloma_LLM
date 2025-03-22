@@ -4,7 +4,7 @@ from openai import OpenAI
 from django.conf import settings
 import json
 import re
-from .models import TodoItem
+from .models import UserCollection, User
 
 client = OpenAI(api_key = settings.OPENAI_API_KEY)
 
@@ -12,8 +12,12 @@ client = OpenAI(api_key = settings.OPENAI_API_KEY)
 
 def home(request):
     members = {'name':'Yihe', 'sex':'male'}
-    return render(request, 'profile.html', members)
+    return render(request, 'home.html', members)
 
-def todo(request):
-    item = TodoItem.objects.all()
-    return render(request, 'todo.html', {'item': item})
+def user_match(request, userid):
+    item = UserCollection.objects.all()
+
+    user = UserCollection.objects.get(id=userid)
+
+
+    return render(request, 'todo_test.html', {'user': user})
