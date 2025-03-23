@@ -11,17 +11,21 @@ client = OpenAI(api_key = settings.OPENAI_API_KEY)
 
 # Create your views here.
 
-def home(request):
-    members = User.objects.all()
-    return render(request, 'home.html', {'members': members})
-
-def user_match(request, userid):
-    item = UserCollection.objects.all()
-
-    user = UserCollection.objects.get(id=userid)
-
-
-    return render(request, 'todo_test.html', {'user': user})
+def index(request):
+    members = UserCollection.objects.all()
+    if request.method == 'POST':
+        if request.POST.get('delete'):
+            uc = UserCollection.objects.get(id=request.POST.get('delete'))
+            uc.delete()  
+            return HttpResponse('User deleted')
+        elif request.POST.get('edit'):
+            uc.name = request.POST.get('edit_create')
+            uc.save()
+            return HttpResponse('User updated')
+        elif request.POST.get('create'):
+            uc = UserCollection(name=request.POST.get('edit_create'))
+            uc.save()
+    return render(request, 'index.html', {'members': members})
 
 def create_user(request):
     if request.method == 'POST':
@@ -40,3 +44,11 @@ def create_user(request):
     else:
         f = CreateNewUser()
     return render(request, 'create.html', {'form': f})
+
+def user_match(request, userid):
+    item = UserCollection.objects.all()
+
+    user = UserCollection.objects.get(id=userid)
+
+
+    return render(request, 'todo_test.html', {'user': user})

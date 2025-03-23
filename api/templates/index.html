@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+<h1>{{members.name}}</h1>
+{% block content %}
+<div>
+  <h1>
+    User List
+  </h1>
+</div>
+<form action="#" method="post">
+  {% csrf_token %}
+  <ul>
+    {% for user in members %}
+    <li style="display: inline;"><input type="checkbox" name="if_checked" id="{{user.id}}" value="{{user.id}}">
+    {{user.name}}</li><button type="submit" name="delete" value="{{user.id}}">Delete</button><br>
+      <!-- {{user.id}}{{user}} -->
+    {% endfor %}
+  </ul>
+  <button type="submit" name="edit" value="edit">Edit</button>
+  <input type="text" name="edit_create">
+  <button type="submit" name="create" value="create">Create</button>
+  <button type="submit" name="view" value="view">View</button>
+</form>
+
+
+
+{% endblock %}
