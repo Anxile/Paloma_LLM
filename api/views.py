@@ -7,6 +7,7 @@ import re
 from .models import UserBase, User, UserFeature
 from .form import CreateNewUser
 from .data_seed import UserData
+from sklearn.metrics.pairwise import cosine_similarity
 
 client = OpenAI(api_key = settings.OPENAI_API_KEY)
 
@@ -48,7 +49,7 @@ def create_user(request):
             userbase.save()
             u = User(age=age, userbase=userbase, gender = gender, height = height, interests = interests, looking_for = looking_for, children = children, education_level = education_level, occupation = occupation, swiping_history = swiping_history, frequency_of_use = frequency_of_use)
             u.save()
-            match(u)
+            embedding(u)
             return HttpResponse('User created')
         else:
             return HttpResponse('Form is not valid')
@@ -57,20 +58,25 @@ def create_user(request):
     return render(request, 'create.html', {'form': f})
 
 def user_match(request, userid):
+    similarity = []
     user = UserBase.objects.get(id=userid)
     collection = UserBase.objects.all()
-    for match in collection:
-        target_user = User.objects.get(userbase = match)
-        
+    if user.preprocessed == True:
+        for match in collection:
+            if match.preprocessed == False:
+                embedding(User.objects.get(userbase=match))
+            similarity.append(compute_similarity(user, match))
+    else:
+        embedding(User.objects.get(userbase=user))
+    print(similarity)
+    return render(request, 'todo_test.html', {'user': user, 'set': collection, 's' : similarity})
 
-    return render(request, 'todo_test.html', {'user': user, 'set': collection})
 
-
-def match(new_user, model="text-embedding-3-small"):
+def embedding(new_user, model="text-embedding-3-small", context="dating"):
     # new_user 是 User 实例，通过外键获取关联的 UserBase 实例
     base = new_user.userbase
     # 获取对应的 UserFeature，注意确保记录存在，否则需要先创建或处理异常
-    featured_user = UserFeature.objects.get(userbase=base)
+    featured_user = UserFeature.objects.create(userbase=base, context=context, feature_vector=[])
     
     # 拼接字符串，各字段转成字符串，注意部分字段可能为 None
     text = ' '.join([
@@ -93,6 +99,10 @@ def match(new_user, model="text-embedding-3-small"):
     base.save()
     return HttpResponse('User processed')
 
+def compute_similarity(user1, user2):
+    user1_deature = UserFeature.objects.get(userbase = user1)
+    user2_deature = UserFeature.objects.get(userbase = user2)
+    return cosine_similarity([user1_deature.feature_vector], [user2_deature.feature_vector])
 
 def import_user(request):
     user_data = UserData.data
