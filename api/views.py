@@ -76,9 +76,7 @@ def user_match(request, userid):
 
 
 def embedding_extract(new_user, model="text-embedding-3-small", context="dating"):
-    # new_user 是 User 实例，通过外键获取关联的 UserBase 实例
     base = new_user.userbase
-    # 获取对应的 UserFeature，注意确保记录存在，否则需要先创建或处理异常
     
     text = ' '.join([
         str(new_user.age),
