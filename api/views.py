@@ -49,7 +49,7 @@ def create_user(request):
             userbase.save()
             u = User(age=age, userbase=userbase, gender = gender, height = height, interests = interests, looking_for = looking_for, children = children, education_level = education_level, occupation = occupation, swiping_history = swiping_history, frequency_of_use = frequency_of_use)
             u.save()
-            embedding(u)
+            embedding_extract(u)
             return HttpResponse('User created')
         else:
             return HttpResponse('Form is not valid')
@@ -58,27 +58,28 @@ def create_user(request):
     return render(request, 'create.html', {'form': f})
 
 def user_match(request, userid):
-    similarity = []
+    candidates = []
     user = UserBase.objects.get(id=userid)
     collection = UserBase.objects.all()
-    if user.preprocessed == True:
+    if user.preprocessed:
         for match in collection:
-            if match.preprocessed == False:
-                embedding(User.objects.get(userbase=match))
-            similarity.append(compute_similarity(user, match))
+            if match.id == user.id:
+                continue
+            if not match.preprocessed:
+                embedding_extract(User.objects.get(userbase=match))
+            sim = compute_similarity(user, match)
+            candidates.append((match, sim))
     else:
-        embedding(User.objects.get(userbase=user))
-    print(similarity)
-    return render(request, 'todo_test.html', {'user': user, 'set': collection, 's' : similarity})
+        embedding_extract(User.objects.get(userbase=user))
+    top_candidates = ranking(candidates)
+    return render(request, 'match_result.html', {'user': user, 'set': collection, 's': top_candidates})
 
 
-def embedding(new_user, model="text-embedding-3-small", context="dating"):
+def embedding_extract(new_user, model="text-embedding-3-small", context="dating"):
     # new_user 是 User 实例，通过外键获取关联的 UserBase 实例
     base = new_user.userbase
     # 获取对应的 UserFeature，注意确保记录存在，否则需要先创建或处理异常
-    featured_user = UserFeature.objects.create(userbase=base, context=context, feature_vector=[])
     
-    # 拼接字符串，各字段转成字符串，注意部分字段可能为 None
     text = ' '.join([
         str(new_user.age),
         new_user.gender or "",
@@ -93,16 +94,20 @@ def embedding(new_user, model="text-embedding-3-small", context="dating"):
     ])
     
     client_response = client.embeddings.create(input=[text], model=model).data[0].embedding
-    featured_user.feature_vector = client_response
-    featured_user.save()
-    base.preprocessed = True
+    featured_user = UserFeature.objects.create(feature_vector = client_response, userbase = base, context = context)
+    base.preprocessed = 1
     base.save()
-    return HttpResponse('User processed')
+    return HttpResponse('User processed', featured_user)
 
 def compute_similarity(user1, user2):
     user1_deature = UserFeature.objects.get(userbase = user1)
     user2_deature = UserFeature.objects.get(userbase = user2)
-    return cosine_similarity([user1_deature.feature_vector], [user2_deature.feature_vector])
+    return cosine_similarity([user1_deature.feature_vector], [user2_deature.feature_vector])[0][0]
+
+def ranking(candidates):
+    # candidates 为 [(UserBase实例, similarity), ...]
+    sorted_candidates = sorted(candidates, key=lambda x: x[1], reverse=True)
+    return sorted_candidates[:10]
 
 def import_user(request):
     user_data = UserData.data
