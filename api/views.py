@@ -4,7 +4,7 @@ from openai import OpenAI
 from django.conf import settings
 import json
 import re
-from .models import UserBase, User
+from .models import UserBase, User, UserFeature
 from .form import CreateNewUser
 from .data_seed import UserData
 
@@ -35,10 +35,20 @@ def create_user(request):
             f_clean = f.cleaned_data
             name = f_clean['name']
             age = f_clean['age']
+            gender = f_clean['gender']
+            height = f_clean['height']
+            interests = f_clean['interests']
+            looking_for = f_clean['looking_for']
+            children = f_clean['children']
+            education_level = f_clean['education_level']
+            occupation = f_clean['occupation']
+            swiping_history = f_clean['swiping_history']
+            frequency_of_use = f_clean['frequency_of_use']
             userbase = UserBase(name=name, preprocessed=False)
             userbase.save()
-            u = User(name=name, age=age, userBase=userbase)
+            u = User(age=age, userbase=userbase, gender = gender, height = height, interests = interests, looking_for = looking_for, children = children, education_level = education_level, occupation = occupation, swiping_history = swiping_history, frequency_of_use = frequency_of_use)
             u.save()
+            match(u)
             return HttpResponse('User created')
         else:
             return HttpResponse('Form is not valid')
@@ -47,12 +57,42 @@ def create_user(request):
     return render(request, 'create.html', {'form': f})
 
 def user_match(request, userid):
-    item = UserBase.objects.all()
-
     user = UserBase.objects.get(id=userid)
+    collection = UserBase.objects.all()
+    for match in collection:
+        target_user = User.objects.get(userbase = match)
+        
+
+    return render(request, 'todo_test.html', {'user': user, 'set': collection})
 
 
-    return render(request, 'todo_test.html', {'user': user})
+def match(new_user, model="text-embedding-3-small"):
+    # new_user 是 User 实例，通过外键获取关联的 UserBase 实例
+    base = new_user.userbase
+    # 获取对应的 UserFeature，注意确保记录存在，否则需要先创建或处理异常
+    featured_user = UserFeature.objects.get(userbase=base)
+    
+    # 拼接字符串，各字段转成字符串，注意部分字段可能为 None
+    text = ' '.join([
+        str(new_user.age),
+        new_user.gender or "",
+        str(new_user.height),
+        new_user.interests or "",
+        new_user.looking_for or "",
+        str(new_user.children),
+        new_user.education_level or "",
+        new_user.occupation or "",
+        str(new_user.swiping_history),
+        new_user.frequency_of_use or ""
+    ])
+    
+    client_response = client.embeddings.create(input=[text], model=model).data[0].embedding
+    featured_user.feature_vector = client_response
+    featured_user.save()
+    base.preprocessed = True
+    base.save()
+    return HttpResponse('User processed')
+
 
 def import_user(request):
     user_data = UserData.data

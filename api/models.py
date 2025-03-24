@@ -30,9 +30,9 @@ class User(models.Model):
     #     user = UserCollection.objects.get(name=User.objects.get(name=self.name).usercollection)
     #     return self.name+' Processed: '+str(user.preprocessed)
     def __str__(self):
-        return self.usercollection.name
+        return self.userbase.name
     
 class UserFeature(models.Model):
-    usercollection = models.ForeignKey(UserBase, on_delete=models.CASCADE)
+    userbase = models.ForeignKey(UserBase, on_delete=models.CASCADE)
     feature_vector = models.JSONField()
     context = models.CharField(max_length=200)  #dating, friendship, business, etc
