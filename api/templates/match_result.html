@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
 {% block content %}
-    <h1>{{user.name}}</h1>
-    {% for matched_user in s%}
-        <p>{{matched_user}}</p>
+    <h1>Hi, {{user.name}}</h1>
+    <h2>Here are your top 10 matches:</h2>
+    {% for matched_user in candidates%}
+        <p>{{matched_user.0}}, UserID: {{matched_user.0.id}}, Similarity: {{matched_user.1 | floatformat:4}}</p>
     {% endfor %}
 {% endblock %}
 {% block title %}Your Match Result{% endblock %}

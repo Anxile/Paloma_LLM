@@ -72,7 +72,7 @@ def user_match(request, userid):
     else:
         embedding_extract(User.objects.get(userbase=user))
     top_candidates = ranking(candidates)
-    return render(request, 'match_result.html', {'user': user, 'set': collection, 's': top_candidates})
+    return render(request, 'match_result.html', {'user': user, 'candidates': top_candidates})
 
 
 def embedding_extract(new_user, model="text-embedding-3-small", context="dating"):
