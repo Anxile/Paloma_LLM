@@ -17,7 +17,7 @@ class User(models.Model):
     userbase = models.OneToOneField(UserBase, on_delete=models.CASCADE)
     age = models.IntegerField(null=True)
     gender = models.CharField(max_length=200, null=True)
-    height = models.IntegerField(null=True)
+    height = models.FloatField(null=True)
     interests = models.TextField(null=True)
     looking_for = models.CharField(max_length=200, null=True)
     children = models.BooleanField(default=False, null=True)

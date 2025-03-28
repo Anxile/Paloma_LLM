@@ -18,7 +18,7 @@ def index(request):
     if request.method == 'POST':
         if request.POST.get('delete'):
             ub = UserBase.objects.get(id=request.POST.get('delete'))
-            ub.delete()  
+            ub.delete()
             return HttpResponse('User deleted')
         elif request.POST.get('edit'):
             ub.name = request.POST.get('edit_create')
@@ -98,14 +98,27 @@ def embedding_extract(new_user, model="text-embedding-3-small", context="dating"
     return HttpResponse('User processed', featured_user)
 
 def compute_similarity(user1, user2):
-    user1_deature = UserFeature.objects.get(userbase = user1)
-    user2_deature = UserFeature.objects.get(userbase = user2)
-    return cosine_similarity([user1_deature.feature_vector], [user2_deature.feature_vector])[0][0]
+    user1_feature = UserFeature.objects.get(userbase = user1)
+    user2_feature = UserFeature.objects.get(userbase = user2)
+    return cosine_similarity([user1_feature.feature_vector], [user2_feature.feature_vector])[0][0]
 
 def ranking(candidates):
-    # candidates 为 [(UserBase实例, similarity), ...]
+    # candidates: [(UserBase instances, similarity), ...]
     sorted_candidates = sorted(candidates, key=lambda x: x[1], reverse=True)
     return sorted_candidates[:10]
+
+def test_cosine_similarity(request):
+    text1 = request.GET.get('text1', '')
+    text2 = request.GET.get('text2', '')
+
+    if not text1 or not text2:
+        return HttpResponse("Missing parameters", status=400)
+
+    response1 = client.embeddings.create(input=[text1], model="text-embedding-3-small").data[0].embedding
+    response2 = client.embeddings.create(input=[text2], model="text-embedding-3-small").data[0].embedding
+
+    similarity = cosine_similarity([response1], [response2])[0][0]
+    return HttpResponse(similarity)
 
 def import_user(request):
     user_data = UserData.data
