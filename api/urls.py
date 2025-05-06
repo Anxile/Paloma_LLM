@@ -8,4 +8,5 @@ urlpatterns = [
     path('import-users/', views.import_user, name='import-users'),
     path('test/', views.test_cosine_similarity),
     path('predict/<uuid:matcher>/', views.predict, name='predict_match_full'),
+    path('predict_one_on_one/<uuid:matcher>/<uuid:matchee>', views.predict_one_on_one, name='predict_match'),
 ]

@@ -6,7 +6,7 @@ import os
 import re # For sanitizing feature names when loading
 from django.conf import settings # Or define BASE_DIR directly
 
-# --- Define Paths (Update your_app_name) ---
+# --- Define Paths ---
 MODEL_DIR = os.path.join(settings.BASE_DIR, 'api', 'trained_model')
 MODEL_PATH = os.path.join(MODEL_DIR, 'full_engineered_model.joblib')
 SCALER_PATH = os.path.join(MODEL_DIR, 'scaler_full.joblib')
@@ -34,7 +34,7 @@ except Exception as e:
 # Base features
 BASE_NUMERICAL_COLS = ['age_1', 'age_2']
 BASE_CATEGORICAL_COLS = ['gender_1', 'gender_2']
-# Importance scores (use the list from training script)
+# Importance scores 
 IMPORTANCE_COLS = [
     'age_importance_1', 'age_importance_2', 'degree_importance_1', 'degree_importance_2',
     'children_importance_1', 'children_importance_2', 'ethnicity_importance_1', 'ethnicity_importance_2',
