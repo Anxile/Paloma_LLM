@@ -6,7 +6,7 @@ import json
 import re
 from .models import UserBase, User, UserFeature,UserProfile
 from .form import CreateNewUser
-from .data_seed import UserData
+from ..user.data_seed import UserData
 from sklearn.metrics.pairwise import cosine_similarity
 
 from . import predictor
