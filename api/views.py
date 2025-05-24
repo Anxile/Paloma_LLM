@@ -6,7 +6,7 @@ import json
 import re
 from .models import UserBase, User, UserFeature,UserProfile
 from .form import CreateNewUser
-from ..user.data_seed import UserData
+from ..user.seeds.data_seed import UserData
 from sklearn.metrics.pairwise import cosine_similarity
 
 from . import predictor
@@ -159,49 +159,49 @@ def predict_one_on_one(request, matcher, matchee):
             return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
 
 
-def index(request):
-    members = UserBase.objects.all()
-    if request.method == 'POST':
-        if request.POST.get('delete'):
-            ub = UserBase.objects.get(id=request.POST.get('delete'))
-            ub.delete()
-            return HttpResponse('User deleted')
-        elif request.POST.get('edit'):
-            ub.name = request.POST.get('edit_create')
-            ub.save()
-            return HttpResponse('User updated')
-        elif request.POST.get('create'):
-            ub = UserBase(name=request.POST.get('edit_create'))
-            ub.save()
-    return render(request, 'index.html', {'members': members})
+# def index(request):
+#     members = UserBase.objects.all()
+#     if request.method == 'POST':
+#         if request.POST.get('delete'):
+#             ub = UserBase.objects.get(id=request.POST.get('delete'))
+#             ub.delete()
+#             return HttpResponse('User deleted')
+#         elif request.POST.get('edit'):
+#             ub.name = request.POST.get('edit_create')
+#             ub.save()
+#             return HttpResponse('User updated')
+#         elif request.POST.get('create'):
+#             ub = UserBase(name=request.POST.get('edit_create'))
+#             ub.save()
+#     return render(request, 'index.html', {'members': members})
 
-def create_user(request):
-    if request.method == 'POST':
-        f = CreateNewUser(request.POST)
-        if f.is_valid():
-            f_clean = f.cleaned_data
-            name = f_clean['name']
-            age = f_clean['age']
-            gender = f_clean['gender']
-            height = f_clean['height']
-            interests = f_clean['interests']
-            looking_for = f_clean['looking_for']
-            children = f_clean['children']
-            education_level = f_clean['education_level']
-            occupation = f_clean['occupation']
-            swiping_history = f_clean['swiping_history']
-            frequency_of_use = f_clean['frequency_of_use']
-            userbase = UserBase(name=name, preprocessed=False)
-            userbase.save()
-            u = User(age=age, userbase=userbase, gender = gender, height = height, interests = interests, looking_for = looking_for, children = children, education_level = education_level, occupation = occupation, swiping_history = swiping_history, frequency_of_use = frequency_of_use)
-            u.save()
-            embedding_extract(u)
-            return HttpResponse('User created')
-        else:
-            return HttpResponse('Form is not valid')
-    else:
-        f = CreateNewUser()
-    return render(request, 'create.html', {'form': f})
+# def create_user(request):
+#     if request.method == 'POST':
+#         f = CreateNewUser(request.POST)
+#         if f.is_valid():
+#             f_clean = f.cleaned_data
+#             name = f_clean['name']
+#             age = f_clean['age']
+#             gender = f_clean['gender']
+#             height = f_clean['height']
+#             interests = f_clean['interests']
+#             looking_for = f_clean['looking_for']
+#             children = f_clean['children']
+#             education_level = f_clean['education_level']
+#             occupation = f_clean['occupation']
+#             swiping_history = f_clean['swiping_history']
+#             frequency_of_use = f_clean['frequency_of_use']
+#             userbase = UserBase(name=name, preprocessed=False)
+#             userbase.save()
+#             u = User(age=age, userbase=userbase, gender = gender, height = height, interests = interests, looking_for = looking_for, children = children, education_level = education_level, occupation = occupation, swiping_history = swiping_history, frequency_of_use = frequency_of_use)
+#             u.save()
+#             embedding_extract(u)
+#             return HttpResponse('User created')
+#         else:
+#             return HttpResponse('Form is not valid')
+#     else:
+#         f = CreateNewUser()
+#     return render(request, 'create.html', {'form': f})
 
 def user_match(request, userid):
     candidates = []
@@ -221,27 +221,27 @@ def user_match(request, userid):
     return render(request, 'match_result.html', {'user': user, 'candidates': top_candidates})
 
 
-def embedding_extract(new_user, model="text-embedding-3-small", context="dating"):
-    base = new_user.userbase
+# def embedding_extract(new_user, model="text-embedding-3-small", context="dating"):
+#     base = new_user.userbase
     
-    text = ' '.join([
-        str(new_user.age),
-        new_user.gender or "",
-        str(new_user.height),
-        new_user.interests or "",
-        new_user.looking_for or "",
-        str(new_user.children),
-        new_user.education_level or "",
-        new_user.occupation or "",
-        str(new_user.swiping_history),
-        new_user.frequency_of_use or ""
-    ])
+#     text = ' '.join([
+#         str(new_user.age),
+#         new_user.gender or "",
+#         str(new_user.height),
+#         new_user.interests or "",
+#         new_user.looking_for or "",
+#         str(new_user.children),
+#         new_user.education_level or "",
+#         new_user.occupation or "",
+#         str(new_user.swiping_history),
+#         new_user.frequency_of_use or ""
+#     ])
     
-    client_response = client.embeddings.create(input=[text], model=model).data[0].embedding
-    featured_user = UserFeature.objects.create(feature_vector = client_response, userbase = base, context = context)
-    base.preprocessed = 1
-    base.save()
-    return HttpResponse('User processed', featured_user)
+#     client_response = client.embeddings.create(input=[text], model=model).data[0].embedding
+#     featured_user = UserFeature.objects.create(feature_vector = client_response, userbase = base, context = context)
+#     base.preprocessed = 1
+#     base.save()
+#     return HttpResponse('User processed', featured_user)
 
 def compute_similarity(user1, user2):
     user1_feature = UserFeature.objects.get(userbase = user1)
@@ -272,18 +272,16 @@ def import_user(request):
     count = 0
     
     for item in user_data:
-        # 假设 UserBase 的 name 字段按照 "User_<User ID>" 的格式存储
         user_base_name = f"User_{item.get('User ID')}"
         
         try:
-            # 若不存在，则创建对应的 UserBase 记录
             try:
                 user_base = UserBase.objects.get(name=user_base_name)
             except UserBase.DoesNotExist:
                 user_base = UserBase.objects.create(name=user_base_name, preprocessed=False)
             
             User.objects.create(
-                userbase=user_base,  # 建立关联
+                userbase=user_base,
                 age=item.get('Age'),
                 gender=item.get('Gender'),
                 height=item.get('Height'),
