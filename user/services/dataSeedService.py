@@ -1,9 +1,10 @@
-from models import UserBase, User
-from seeds import data_seed as UserData
-from django.http import HttpResponse
+from user.models.user_base import UserBase
+from user.models.user import User
+from user.seeds.data_seed import UserData
+from django.http import JsonResponse
 
 
-def import_user(request):
+def seedUserData():
     user_data = UserData.data
 
     count = 0
@@ -36,4 +37,4 @@ def import_user(request):
         except Exception as e:
             print(f"Error creating User for {user_base_name}: {str(e)}")
     
-    return HttpResponse(f"Created {count} users out of {len(user_data)}")
+    return JsonResponse({"message":"Created {count} users out of {len(user_data)}"}, status=200)

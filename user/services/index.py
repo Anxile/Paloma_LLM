@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from user.models import UserBase
+from user.models import user_base as UserBase
 
 def index(request):
     members = UserBase.objects.all()

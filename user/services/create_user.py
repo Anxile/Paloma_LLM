@@ -1,9 +1,9 @@
-from user.models import UserBase
+from user.models import user_base as UserBase
 from django.shortcuts import render
 from django.http import HttpResponse
 from user.models.user import User
 from pre_process.services.embeddingService import embedding_extract
-from ..forms import CreateNewUser
+from ..forms import new_user_form as CreateNewUser
 
 def create_user(request):
     if request.method == 'POST':

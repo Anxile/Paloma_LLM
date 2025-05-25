@@ -1,4 +1,4 @@
-from ..models import UserFeature
+from user.models import user_feature as UserFeature
 from openai import OpenAI
 from django.http import HttpResponse
 from django.conf import settings

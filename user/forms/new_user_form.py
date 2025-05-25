@@ -1,5 +1,4 @@
 from django import forms
-from ..models import User
 
 class CreateNewUser(forms.Form):
     name = forms.CharField(label='name', max_length=200)
