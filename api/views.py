@@ -8,8 +8,6 @@ from .models import UserBase, User, UserFeature,UserProfile
 from .form import CreateNewUser
 from sklearn.metrics.pairwise import cosine_similarity
 
-from . import predictor
-
 
 import joblib
 
@@ -168,7 +166,4 @@ def compute_similarity(user1, user2):
     user2_feature = UserFeature.objects.get(userbase = user2)
     return cosine_similarity([user1_feature.feature_vector], [user2_feature.feature_vector])[0][0]
 
-def ranking(candidates):
-    # candidates: [(UserBase instances, similarity), ...]
-    sorted_candidates = sorted(candidates, key=lambda x: x[1], reverse=True)
-    return sorted_candidates[:10]
+

@@ -1,5 +1,9 @@
+from api.views import compute_similarity
 from user.models import UserBase, User, UserFeature
 from pre_process.services.embeddingService import embedding_extract
+from .rankingService import ranking
+from django.http import JsonResponse
+
 
 def user_match(request, userid):
     candidates = []
@@ -16,4 +20,4 @@ def user_match(request, userid):
     else:
         embedding_extract(User.objects.get(userbase=user))
     top_candidates = ranking(candidates)
-    return render(request, 'match_result.html', {'user': user, 'candidates': top_candidates})
+    return JsonResponse(request, {'user': user, 'candidates': top_candidates})

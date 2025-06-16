@@ -7,7 +7,7 @@ import re # For sanitizing feature names when loading
 from django.conf import settings # Or define BASE_DIR directly
 
 # --- Define Paths ---
-MODEL_DIR = os.path.join(settings.BASE_DIR, 'api', 'trained_model')
+MODEL_DIR = os.path.join(settings.BASE_DIR, 'ml_model', 'trained_model')
 MODEL_PATH = os.path.join(MODEL_DIR, 'full_engineered_model.joblib')
 SCALER_PATH = os.path.join(MODEL_DIR, 'scaler_full.joblib')
 ENCODER_PATH = os.path.join(MODEL_DIR, 'encoder_full.joblib')

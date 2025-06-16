@@ -1,24 +1,24 @@
-from user.models import user_feature as UserFeature
+from user.models.user_feature import UserFeature
 from openai import OpenAI
 from django.http import HttpResponse
 from django.conf import settings
 client = OpenAI(api_key = settings.OPENAI_API_KEY)
 
 
-def embedding_extract(new_user, model="text-embedding-3-small", context="dating"):
-    base = new_user.userbase
+def embedding_extract(user, model="text-embedding-3-small", context="dating"):
+    base = user.userbase
     
     text = ' '.join([
-        str(new_user.age),
-        new_user.gender or "",
-        str(new_user.height),
-        new_user.interests or "",
-        new_user.looking_for or "",
-        str(new_user.children),
-        new_user.education_level or "",
-        new_user.occupation or "",
-        str(new_user.swiping_history),
-        new_user.frequency_of_use or ""
+        str(user.age),
+        user.gender or "",
+        str(user.height),
+        user.interests or "",
+        user.looking_for or "",
+        str(user.children),
+        user.education_level or "",
+        user.occupation or "",
+        str(user.swiping_history),
+        user.frequency_of_use or ""
     ])
     
     client_response = client.embeddings.create(input=[text], model=model).data[0].embedding
